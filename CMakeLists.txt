@@ -20,7 +20,8 @@ if (CMAKE_VERSION VERSION_LESS REQUIRED_VERSION)
 elseif (CMAKE_VERSION VERSION_GREATER CHECKED_VERSION)
 	message(WARNING "Untested version of cmake. If you checked everything is working properly, please update ${CHECKED_VERSION} in the main CmakeLists.txt with the version you tested.")
 endif()
-
+set(CMAKE_CUDA_ARCHITECTURES "60;75;80;89")
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 ## Include cmake stuff (functions/macros) : Modules files
 if(WIN32)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows)

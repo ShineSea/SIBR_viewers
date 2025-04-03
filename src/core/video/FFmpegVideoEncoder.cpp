@@ -43,7 +43,7 @@ namespace sibr {
 			SIBR_LOG << "[FFMPEG] Registering all." << std::endl;
 			// Ignore next line warning.
 #pragma warning(suppress : 4996)
-			av_register_all();
+			//av_register_all();
 			ffmpegInitDone = true;
 		}
 		
@@ -77,9 +77,12 @@ namespace sibr {
 		if (av_write_trailer(pFormatCtx) < 0) {
 			SIBR_WRG << "[FFMPEG] Can not av_write_trailer " << std::endl;
 		}
-
+		if(pCodecCtx)
+		{
+			avcodec_free_context(&pCodecCtx);
+		}
 		if (video_st) {
-			avcodec_close(video_st->codec);
+		//	avcodec_close(video_st->codec);
 			av_free(frameYUV);
 		}
 		avio_close(pFormatCtx->pb);
@@ -128,16 +131,6 @@ namespace sibr {
 			SIBR_WRG << "[FFMPEG] Could not find codec." << std::endl;
 			return;
 		}
-
-		video_st = avformat_new_stream(pFormatCtx, pCodec);
-
-		if (video_st == NULL) {
-			SIBR_WRG << "[FFMPEG] Could not create stream." << std::endl;
-			return;
-		}
-
-		pCodecCtx = video_st->codec;
-		pCodecCtx->codec_id = fmt->video_codec;
 		pCodecCtx->codec_type = AVMEDIA_TYPE_VIDEO;
 		pCodecCtx->pix_fmt = AV_PIX_FMT_YUV420P;
 		pCodecCtx->width = w;
@@ -157,14 +150,24 @@ namespace sibr {
 			av_dict_set(&param, "preset", "slow", 0);
 			av_dict_set(&param, "tune", "zerolatency", 0);
 		}
-
-		av_dump_format(pFormatCtx, 0, out_file, 1);
-
 		int res = avcodec_open2(pCodecCtx, pCodec, &param);
 		if(res < 0){
 			SIBR_WRG << "[FFMPEG] Failed to open encoder, error: " << res << std::endl;
 			return;
 		}
+
+		video_st = avformat_new_stream(pFormatCtx, NULL);
+
+		if (video_st == NULL) {
+			SIBR_WRG << "[FFMPEG] Could not create stream." << std::endl;
+			return;
+		}
+		avcodec_parameters_from_context(video_st->codecpar, pCodecCtx);
+		video_st->time_base=pCodecCtx->time_base;
+
+		av_dump_format(pFormatCtx, 0, out_file, 1);
+
+
 		// Write the file header.
 		avformat_write_header(pFormatCtx, NULL);
 
@@ -228,19 +231,29 @@ namespace sibr {
 
 #ifndef HEADLESS
 	bool FFVideoEncoder::encode(AVFrame * frame)
-	{
-		int got_picture = 0;
-
-		int ret = avcodec_encode_video2(pCodecCtx, pkt, frameYUV, &got_picture);
+	{	
+		int ret = 0;
+		ret=avcodec_send_frame(pCodecCtx, frame);
 		if (ret < 0) {
 			SIBR_WRG << "[FFMPEG] Failed to encode frame." << std::endl;
 			return false;
 		}
-		if (got_picture == 1) {
-			pkt->stream_index = video_st->index;
-			ret = av_write_frame(pFormatCtx, pkt);
+		
+		while ((ret = avcodec_receive_packet(pCodecCtx, pkt))>=0) {
+			av_write_frame(pFormatCtx, pkt);
 			av_packet_unref(pkt);
 		}
+		//int got_picture = 0;
+		// int ret = avcodec_encode_video2(pCodecCtx, pkt, frameYUV, &got_picture);
+		// if (ret < 0) {
+		// 	SIBR_WRG << "[FFMPEG] Failed to encode frame." << std::endl;
+		// 	return false;
+		// }
+		// if (got_picture == 1) {
+		// 	pkt->stream_index = video_st->index;
+		// 	ret = av_write_frame(pFormatCtx, pkt);
+		// 	av_packet_unref(pkt);
+		// }
 
 		return true;
 	}
