@@ -281,8 +281,15 @@ namespace sibr
 
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, bufferID);
 
+			if (cudaPeekAtLastError() != cudaSuccess)
+			{
+				SIBR_ERR << "err1:" << cudaGetErrorString(cudaGetLastError()) ;
+			}
 			sibr::RenderUtility::renderScreenQuad();
-
+			if (cudaPeekAtLastError() != cudaSuccess)
+			{
+				SIBR_ERR << "err2:" << cudaGetErrorString(cudaGetLastError()) ;
+			}
 			dst.unbind();
 			_shader.end();
 		}
@@ -498,6 +505,11 @@ void sibr::GaussianView::onRenderIBR(sibr::IRenderTarget & dst, const sibr::Came
 		int* rects = _fastCulling ? rect_cuda : nullptr;
 		float* boxmin = _cropping ? (float*)&_boxmin : nullptr;
 		float* boxmax = _cropping ? (float*)&_boxmax : nullptr;
+
+		if (cudaPeekAtLastError() != cudaSuccess)
+		{
+			SIBR_ERR << "pre err1:" << cudaGetErrorString(cudaGetLastError()) ;
+		}
 		CudaRasterizer::Rasterizer::forward(
 			geomBufferFunc,
 			binningBufferFunc,
@@ -526,7 +538,10 @@ void sibr::GaussianView::onRenderIBR(sibr::IRenderTarget & dst, const sibr::Came
 			boxmin,
 			boxmax
 		);
-
+	   if (cudaPeekAtLastError() != cudaSuccess)
+		{
+			SIBR_ERR << "pre err2:" << cudaGetErrorString(cudaGetLastError()) ;
+		}
 		if (!_interop_failed)
 		{
 			// Unmap OpenGL resource for use with OpenGL
@@ -537,8 +552,8 @@ void sibr::GaussianView::onRenderIBR(sibr::IRenderTarget & dst, const sibr::Came
 			CUDA_SAFE_CALL(cudaMemcpy(fallback_bytes.data(), fallbackBufferCuda, fallback_bytes.size(), cudaMemcpyDeviceToHost));
 			glNamedBufferSubData(imageBuffer, 0, fallback_bytes.size(), fallback_bytes.data());
 		}
-		// Copy image contents to framebuffer
-		_copyRenderer->process(imageBuffer, dst, _resolution.x(), _resolution.y());
+			// Copy image contents to framebuffer
+			_copyRenderer->process(imageBuffer, dst, _resolution.x(), _resolution.y());
 	}
 
 	if (cudaPeekAtLastError() != cudaSuccess)

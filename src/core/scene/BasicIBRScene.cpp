@@ -28,6 +28,12 @@ namespace sibr
 		_imgs.reset(new InputImages());
 		_proxies.reset(new ProxyMesh());
 		_renderTargets.reset(new RenderTargetTextures());
+
+        std::vector<InputCamera::Ptr> cams;
+		sibr::InputCamera::Ptr camera = std::make_shared<InputCamera>(InputCamera(1000, 1000, 0.0f, 0.0f, 1920, 1080, 0));
+		cams.push_back(camera);
+		_data->cameras(cams);
+		_cams->setupFromData(_data);
 	}
 
 	BasicIBRScene::BasicIBRScene(const BasicIBRAppArgs & myArgs, bool noRTs, bool noMesh)

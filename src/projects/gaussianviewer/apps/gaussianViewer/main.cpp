@@ -104,8 +104,6 @@ int main(int ac, char** av)
 	
 	if(!myArgs.modelPath.isInit() && myArgs.modelPathShort.isInit())
 		myArgs.modelPath = myArgs.modelPathShort.get();
-	if(!myArgs.dataset_path.isInit() && myArgs.pathShort.isInit())
-		myArgs.dataset_path = myArgs.pathShort.get();
 
 	int device = myArgs.device;
 
@@ -116,8 +114,6 @@ int main(int ac, char** av)
 	// window size
 	uint win_width = rendering_width; // myArgs.win_width;
 	uint win_height = rendering_height; // myArgs.win_height;
-
-	const char* toload = myArgs.modelPath.get().c_str();
 
 	// Window setup
 	sibr::Window		window(PROGRAM_NAME, sibr::Vector2i(50, 50), myArgs, getResourcesDirectory() + "/gaussians/" + PROGRAM_NAME + ".ini");
@@ -133,64 +129,81 @@ int main(int ac, char** av)
 	ImGui::GetCurrentContext()->SettingsHandlers.push_back(ini_handler);
 	window.loadSettings();
 
-	std::string cfgLine;
-	std::ifstream cfgFile(myArgs.modelPath.get() + "/cfg_args");
-	if (!cfgFile.good())
-	{
-		SIBR_ERR << "Could not find config file 'cfg_args' at " << myArgs.modelPath.get();
-	}
-	std::getline(cfgFile, cfgLine);
-
-	if (!myArgs.dataset_path.isInit())
-	{
-		auto rng = findArg(cfgLine, "source_path");
-		myArgs.dataset_path = cfgLine.substr(rng.first + 1, rng.second - rng.first - 2);
-	}
-
-	auto rng = findArg(cfgLine, "sh_degree");
-	int sh_degree = std::stoi(cfgLine.substr(rng.first, rng.second - rng.first));
-
-	rng = findArg(cfgLine, "white_background");
-	bool white_background = cfgLine.substr(rng.first, rng.second - rng.first).find("True") != -1;
-
-	BasicIBRScene::SceneOptions myOpts;
-	myOpts.renderTargets = myArgs.loadImages;
-	myOpts.mesh = true;
-	myOpts.images = myArgs.loadImages;
-	myOpts.cameras = true;
-	myOpts.texture = false;
-
+    int sh_degree = 0;
+	bool white_background = false;
+	std::string plyfile;
 	BasicIBRScene::Ptr scene;
-	try
+	if(myArgs.plyPath.isInit())
 	{
-		scene.reset(new BasicIBRScene(myArgs, myOpts));
-	}
-	catch (...)
-	{
-		SIBR_LOG << "Did not find specified input folder, loading from model path" << std::endl;
-		myArgs.dataset_path = myArgs.modelPath.get();
-		scene.reset(new BasicIBRScene(myArgs, myOpts));
-	}
+		plyfile = myArgs.plyPath.get();
+		if (!myArgs.dataset_path.isInit())
+		{
+			myArgs.dataset_path = plyfile;
+		}
+		scene.reset(new BasicIBRScene());
+	}else{
+		std::string cfgLine;
+		std::ifstream cfgFile(myArgs.modelPath.get() + "/cfg_args");
+		if (!cfgFile.good())
+		{
+			SIBR_ERR << "Could not find config file 'cfg_args' at " << myArgs.modelPath.get();
+		}
+		std::getline(cfgFile, cfgLine);
 
-	std::string plyfile = myArgs.modelPath.get();
-	if (plyfile.back() != '/')
-		plyfile += "/";
-	plyfile += "point_cloud";
-	if (!myArgs.iteration.isInit())
-	{
-		plyfile += "/" + findLargestNumberedSubdirectory(plyfile) + "/point_cloud.ply";
-	}
-	else
-	{
-		plyfile += "/iteration_" + myArgs.iteration.get() + "/point_cloud.ply";
-	}
+		if (!myArgs.dataset_path.isInit())
+		{
+			auto rng = findArg(cfgLine, "source_path");
+			myArgs.dataset_path = cfgLine.substr(rng.first + 1, rng.second - rng.first - 2);
+		}
 
+		auto rng = findArg(cfgLine, "sh_degree");
+		sh_degree = std::stoi(cfgLine.substr(rng.first, rng.second - rng.first));
+
+		rng = findArg(cfgLine, "white_background");
+		white_background = cfgLine.substr(rng.first, rng.second - rng.first).find("True") != -1;
+
+		plyfile = myArgs.modelPath.get();
+		if (plyfile.back() != '/')
+			plyfile += "/";
+		plyfile += "point_cloud";
+		if (!myArgs.iteration.isInit())
+		{
+			plyfile += "/" + findLargestNumberedSubdirectory(plyfile) + "/point_cloud.ply";
+		}
+		else
+		{
+			plyfile += "/iteration_" + myArgs.iteration.get() + "/point_cloud.ply";
+		}
+
+		BasicIBRScene::SceneOptions myOpts;
+		myOpts.renderTargets = myArgs.loadImages;
+		myOpts.mesh = true;
+		myOpts.images = myArgs.loadImages;
+		myOpts.cameras = true;
+		myOpts.texture = false;
+
+		try
+		{
+			scene.reset(new BasicIBRScene(myArgs, myOpts));
+		}
+		catch (...)
+		{
+			SIBR_LOG << "Did not find specified input folder, loading from model path" << std::endl;
+			if(myArgs.modelPath.isInit())
+				myArgs.dataset_path = myArgs.modelPath.get();
+			scene.reset(new BasicIBRScene(myArgs, myOpts));
+		}
+	}
 	// Setup the scene: load the proxy, create the texture arrays.
 	const uint flags = SIBR_GPU_LINEAR_SAMPLING | SIBR_FLIP_TEXTURE;
 
 	// Fix rendering aspect ratio if user provided rendering size
-	uint scene_width = scene->cameras()->inputCameras()[0]->w();
-	uint scene_height = scene->cameras()->inputCameras()[0]->h();
+	uint scene_width = 1920;
+	uint scene_height = 1080;
+	if (!scene->cameras()->inputCameras().empty()) {
+		scene_width = scene->cameras()->inputCameras()[0]->w();
+		scene_height = scene->cameras()->inputCameras()[0]->h();
+	}
 	float scene_aspect_ratio = scene_width * 1.0f / scene_height;
 	float rendering_aspect_ratio = rendering_width * 1.0f / rendering_height;
 

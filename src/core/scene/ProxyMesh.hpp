@@ -23,7 +23,9 @@ namespace sibr {
 	public:
 		typedef std::shared_ptr<ProxyMesh>					Ptr;
 
-		ProxyMesh() {};
+		ProxyMesh() {
+			_proxy.reset(new Mesh());
+		};
 		~ProxyMesh() {};
 		void												loadFromData(const IParseData::Ptr & data) override;
 		void												replaceProxy(Mesh::Ptr newProxy) override;

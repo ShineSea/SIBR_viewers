@@ -523,7 +523,7 @@ namespace sibr {
 				SIBR_ERR << "Cannot use dataset_type " + myArgs.dataset_type.get() + " at /" + myArgs.dataset_path.get() + "." << std::endl
 				<< "Reason : Gaussian transform (" << blender << ") does not exist" << std::endl;
 
-			_datasetType = Type::BLENDER;
+			_datasetType = Type::GAUSSIAN;
 		}
 		else {
 			if (sibr::fileExists(bundler)) {
