@@ -1,0 +1,12 @@
+{
+    "dependencies": [
+      "opengl",
+      "opencv",
+      "glew",
+      "assimp",
+      "ffmpeg",
+      "glfw3",
+      "boost",
+      "embree3"
+    ]
+  }

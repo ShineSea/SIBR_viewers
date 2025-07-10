@@ -43,4 +43,9 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+CMakePresets.json
+CMakeUserPresets.json
+/vcpkg_installed
+/.vscode
 /.vs
