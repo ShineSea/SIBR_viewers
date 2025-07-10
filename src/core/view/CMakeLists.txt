@@ -35,7 +35,6 @@ include_directories(
 target_link_libraries(${PROJECT_NAME}
 	${Boost_LIBRARIES}
 	${OpenCV_LIBRARIES}
-	OpenMP::OpenMP_CXX
 	imgui
 	sibr_graphics
 	sibr_assets

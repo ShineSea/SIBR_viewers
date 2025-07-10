@@ -21,8 +21,8 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
 
 	${Boost_LIBRARIES}
-	${ASSIMP_LIBRARIES}
-	${GLEW_LIBRARIES}
+	assimp::assimp
+	GLEW::GLEW
 	${OPENGL_LIBRARIES}
 	${OpenCV_LIBRARIES}
 	sibr_view

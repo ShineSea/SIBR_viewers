@@ -26,11 +26,10 @@ include_directories(
 if(WIN32)
 target_link_libraries(${PROJECT_NAME}
 	${Boost_LIBRARIES}
-	${ASSIMP_LIBRARIES}
-	${GLEW_LIBRARIES}
+	assimp::assimp
+	GLEW::GLEW
 	${OPENGL_LIBRARIES}
 	${OpenCV_LIBRARIES}
-	OpenMP::OpenMP_CXX
 	imgui
 	glfw3
 	sibr_system
@@ -38,11 +37,10 @@ target_link_libraries(${PROJECT_NAME}
 else()
 target_link_libraries(${PROJECT_NAME}
 	${Boost_LIBRARIES}
-	${ASSIMP_LIBRARIES}
-	${GLEW_LIBRARIES}
+	assimp::assimp
+	GLEW::GLEW
 	${OPENGL_LIBRARIES}
 	${OpenCV_LIBRARIES}
-	OpenMP::OpenMP_CXX
 	imgui
 	${GLFW_LIBRARY}
 	sibr_system

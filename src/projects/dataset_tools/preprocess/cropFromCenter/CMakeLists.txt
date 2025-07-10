@@ -21,7 +21,6 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
-	OpenMP::OpenMP_CXX
 	sibr_system
     sibr_graphics
 	sibr_imgproc

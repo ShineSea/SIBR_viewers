@@ -230,7 +230,7 @@ endmacro()
 ##          PLUGIN_PATH_DEST    ${CMAKE_INSTALL_PREFIX}/plugins ## (or relative path 'plugins' will be interpreted relative to installed executable)
 ##		DIRS				${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}
 ##		TARGET_LIBRARIES	${OPENGL_LIBRARIES}         ## DEPRECATED (use TARGET flag instead)
-##							${GLEW_LIBRARIES}
+##							GLEW::GLEW
 ##							${GLUT_LIBRARIES}
 ##							${Boost_LIBRARIES}
 ##							${SuiteSparse_LIBRARIES}

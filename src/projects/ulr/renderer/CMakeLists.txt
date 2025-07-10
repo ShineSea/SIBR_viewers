@@ -27,8 +27,8 @@ include_directories(${Boost_INCLUDE_DIRS} .)
 if(WIN32)
 target_link_libraries(${PROJECT_NAME}
 	${Boost_LIBRARIES}
-	${ASSIMP_LIBRARIES}
-	${GLEW_LIBRARIES}
+	assimp::assimp
+	GLEW::GLEW
 	${OPENGL_LIBRARIES}
 	${OpenCV_LIBRARIES}
 	glfw3
@@ -40,8 +40,8 @@ target_link_libraries(${PROJECT_NAME}
 else()
 target_link_libraries(${PROJECT_NAME}
 	${Boost_LIBRARIES}
-	${ASSIMP_LIBRARIES}
-	${GLEW_LIBRARIES}
+	assimp::assimp
+	GLEW::GLEW
 	${OPENGL_LIBRARIES}
 	${OpenCV_LIBRARIES}
 	${GLFW_LIBRARY}

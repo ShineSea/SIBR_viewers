@@ -24,7 +24,6 @@ if(WIN32)
 target_link_libraries(${PROJECT_NAME}
 	${Boost_LIBRARIES}
 	${OpenCV_LIBRARIES}
-	OpenMP::OpenMP_CXX
 	glfw3
 	mrf
 	sibr_system
@@ -36,7 +35,6 @@ else()
 target_link_libraries(${PROJECT_NAME}
 	${Boost_LIBRARIES}
 	${OpenCV_LIBRARIES}
-	OpenMP::OpenMP_CXX
 	${GLFW_LIBRARY}
 	mrf
 	sibr_system
